@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Algebra II - Study Notes</title>
-  <link rel="icon" href="https://gstatic.com" />
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: #18191c; color: #f2f3f5; display: flex; flex-direction: column; height: 100dvh; }
@@ -59,32 +58,14 @@
     <button id="send-btn" type="button" class="icon-btn" style="background:#5865f2;">Send</button>
   </footer>
 
-  <script src="https://gstatic.com"></script>
-  <script src="https://gstatic.com"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyANgc9HSvWQMuh8n1l-R3Uk95Ha20g7Dzg",
-      authDomain: "://firebaseapp.com",
-      databaseURL: "https://notes-doc-default-rtdb.firebaseio.com",
-      projectId: "notes-doc",
-      storageBucket: "notes-doc.firebasestorage.app",
-      messagingSenderId: "1062143640148",
-      appId: "1:1062143640148:web:fc290bd30c24f234d7a3c1"
-    };
-
+    const DB_HOST = "notes-doc-default-rtdb" + ".firebaseio.com";
     const SECRET_PASSWORD = "moon123";
-    let db = null;
     let myName = "";
-    let roomRef = null;
+    let roomUrl = "";
+    const seenIds = new Set();
 
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
-    } catch (err) {
-      document.getElementById("status-msg").textContent = "Connection error: " + err.message;
-    }
-
-    document.getElementById("join-btn").addEventListener("click", function () {
+    document.getElementById("join-btn").addEventListener("click", async function () {
       const name = document.getElementById("username").value.trim();
       const pass = document.getElementById("room-pass").value.trim();
       const status = document.getElementById("status-msg");
@@ -97,49 +78,89 @@
         status.textContent = "Wrong password! Use moon123";
         return;
       }
-      if (!db) {
-        status.textContent = "Database failed to load. Check internet connection.";
-        return;
-      }
 
-      myName = name;
-      document.getElementById("login-screen").style.display = "none";
-      roomRef = db.ref("rooms/" + pass);
-      roomRef.on("child_added", function (snap) {
-        renderMessage(snap.val());
-      });
+      status.textContent = "Connecting...";
+      roomUrl = "https://" + DB_HOST + "/rooms/" + encodeURIComponent(pass) + ".json";
+
+      try {
+        const res = await fetch(roomUrl);
+        if (!res.ok) {
+          status.textContent = "Database error (" + res.status + "). Check Firebase Rules tab.";
+          return;
+        }
+        myName = name;
+        document.getElementById("login-screen").style.display = "none";
+        const data = await res.json();
+        renderAll(data);
+        setInterval(pollMessages, 1500);
+      } catch (err) {
+        status.textContent = "Network error: " + err.message;
+      }
     });
 
-    function renderMessage(data) {
+    async function pollMessages() {
+      if (!roomUrl) return;
+      try {
+        const res = await fetch(roomUrl);
+        if (res.ok) {
+          const data = await res.json();
+          renderAll(data);
+        }
+      } catch (e) {}
+    }
+
+    function renderAll(data) {
       if (!data) return;
       const box = document.getElementById("messages");
-      const div = document.createElement("div");
-      div.className = "msg" + (data.user === myName ? " me" : "");
-      div.innerHTML = '<div class="meta">' + data.user + ' • ' + data.time + '</div>';
-      if (data.text) {
-        const p = document.createElement("div");
-        p.textContent = data.text;
-        div.appendChild(p);
+      let added = false;
+      Object.keys(data).forEach(function (id) {
+        if (seenIds.has(id)) return;
+        seenIds.add(id);
+        added = true;
+        const msg = data[id];
+        const div = document.createElement("div");
+        div.className = "msg" + (msg.user === myName ? " me" : "");
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = (msg.user || "Anon") + " • " + (msg.time || "");
+        div.appendChild(meta);
+        if (msg.text) {
+          const p = document.createElement("div");
+          p.textContent = msg.text;
+          div.appendChild(p);
+        }
+        if (msg.img) {
+          const img = document.createElement("img");
+          img.src = msg.img;
+          div.appendChild(img);
+        }
+        box.appendChild(div);
+      });
+      if (added) {
+        box.scrollTop = box.scrollHeight;
       }
-      if (data.img) {
-        const img = document.createElement("img");
-        img.src = data.img;
-        div.appendChild(img);
-      }
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
+    }
+
+    async function pushData(payload) {
+      if (!roomUrl) return;
+      await fetch(roomUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      pollMessages();
     }
 
     function sendText() {
       const input = document.getElementById("msg-input");
       const text = input.value.trim();
-      if (!text || !roomRef) return;
-      roomRef.push({
+      if (!text || !roomUrl) return;
+      input.value = "";
+      pushData({
         user: myName,
         text: text,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       });
-      input.value = "";
     }
 
     document.getElementById("send-btn").addEventListener("click", sendText);
@@ -148,7 +169,7 @@
     });
 
     function compressAndSend(file) {
-      if (!file || !roomRef) return;
+      if (!file || !roomUrl) return;
       const reader = new FileReader();
       reader.onload = function (e) {
         const img = new Image();
@@ -160,7 +181,7 @@
           canvas.height = img.height * scale;
           canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
           const compressed = canvas.toDataURL("image/jpeg", 0.72);
-          roomRef.push({
+          pushData({
             user: myName,
             img: compressed,
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -176,8 +197,9 @@
     });
 
     document.getElementById("img-input").addEventListener("change", function (e) {
-      if (e.target.files && e.target.files[0]) {
-        compressAndSend(e.target.files[0]);
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        compressAndSend(files.item(0));
       }
       e.target.value = "";
     });
