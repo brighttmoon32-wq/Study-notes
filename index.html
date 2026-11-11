@@ -4,87 +4,108 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Algebra II - Study Notes</title>
+<link rel="icon" href="https://gstatic.com"/>
 <style>
 *{box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
 body{margin:0;background:#1e1f26;color:#eceef2;display:flex;height:100dvh;overflow:hidden}
-#login,#panic{position:fixed;inset:0;background:#fff;color:#222;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
-#panic{display:none;justify-content:flex-start;align-items:flex-start;overflow-y:auto}
-.card{max-width:380px;width:100%;border:1px solid #ddd;border-radius:12px;padding:24px;box-shadow:0 6px 20px rgba(0,0,0,.08)}
-.card input,.card button,.card select{width:100%;padding:11px;margin-top:10px;border-radius:8px;border:1px solid #ccc;font-size:15px}
-.card button{background:#6c5ce7;color:#fff;border:none;font-weight:600;cursor:pointer;margin-top:14px}
+#login,#panic,#modal{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#login,#panic{background:#fff;color:#222}
+#panic,#modal{display:none}
+#panic{justify-content:flex-start;align-items:flex-start;overflow-y:auto}
+#modal{background:rgba(0,0,0,.7);z-index:90}
+.card{max-width:380px;width:100%;background:#fff;color:#222;border:1px solid #ddd;border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.dark-card{background:#181920;color:#eceef2;border:1px solid #2e303d}
+.card input,.card button,.card select{width:100%;padding:10px 12px;margin-top:10px;border-radius:8px;border:1px solid #ccc;font-size:14px}
+.dark-card input,.dark-card select{background:#252732;color:#fff;border:1px solid #383b4a}
+.btn-p{background:#6c5ce7;color:#fff;border:none;font-weight:600;cursor:pointer;margin-top:12px}
+.btn-d{background:#d63031;color:#fff;border:none;font-weight:600;cursor:pointer;margin-top:8px}
 #side{width:225px;background:#16171d;display:flex;flex-direction:column;border-right:1px solid #2a2c37;flex-shrink:0;transition:.2s}
-.srv{padding:15px 16px;font-weight:700;font-size:16px;background:#131419;border-bottom:1px solid #2a2c37;display:flex;align-items:center;gap:8px;color:#fff}
+.srv{padding:14px 16px;font-weight:700;font-size:16px;background:#131419;border-bottom:1px solid #2a2c37;display:flex;align-items:center;gap:8px;color:#fff}
 .badge{background:linear-gradient(135deg,#7c5dfa,#a29bfe);padding:4px 8px;border-radius:8px;font-size:13px}
-.lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8b8fa3;padding:16px 14px 6px}
-.ch{margin:2px 8px;padding:9px 12px;border-radius:8px;color:#9ea2b4;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;border:none;background:0 0;text-align:left;width:calc(100% - 16px)}
+.lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8b8fa3;padding:14px 14px 4px;display:flex;justify-content:space-between;align-items:center}
+.add-ch{background:0 0;border:none;color:#8b8fa3;font-size:16px;cursor:pointer;padding:0 4px}
+.ch-list{flex:1;overflow-y:auto;padding-bottom:8px}
+.ch{margin:2px 8px;padding:8px 12px;border-radius:8px;color:#9ea2b4;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;border:none;background:0 0;text-align:left;width:calc(100% - 16px)}
 .ch:hover{background:#232530;color:#fff}
 .ch.on{background:#2d2f3e;color:#fff;font-weight:600}
-.me-bar{margin-top:auto;padding:12px;background:#131419;border-top:1px solid #2a2c37;display:flex;align-items:center;gap:10px;font-size:13px}
+.me-bar{padding:10px 12px;background:#131419;border-top:1px solid #2a2c37;display:flex;align-items:center;gap:10px;cursor:pointer}
+.me-bar:hover{background:#1d1f27}
 #main{flex:1;display:flex;flex-direction:column;min-width:0}
 header{height:52px;padding:0 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a2c37;flex-shrink:0}
-#menu-btn{display:none;background:#2a2c37;border:none;color:#fff;padding:6px 10px;border-radius:6px;font-size:16px;cursor:pointer}
-.p-btn{background:#2a2c37;color:#d6d8e1;border:none;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
-#msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
-.row{display:flex;gap:12px;align-items:flex-start;padding:4px 8px;border-radius:8px}
+.h-btns{display:flex;gap:8px;align-items:center}
+.h-btn{background:#2a2c37;color:#d6d8e1;border:none;padding:7px 11px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.p-btn:hover{background:#e17055;color:#fff}
+#menu-btn{display:none;font-size:16px;padding:5px 10px}
+#msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:12px;align-items:flex-start;padding:6px 8px;border-radius:8px}
 .row:hover{background:#242630}
-.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;text-transform:uppercase}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0;text-transform:uppercase;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
 .m-user{font-weight:600;font-size:15px;margin-right:8px}
 .m-time{font-size:11px;color:#8b8fa3}
+.m-rep{font-size:12px;color:#9ea2b4;background:#282a36;padding:3px 8px;border-left:3px solid #6c5ce7;border-radius:4px;margin-bottom:4px}
 .m-txt{font-size:15px;line-height:1.4;color:#e2e4ec;word-wrap:break-word;margin-top:2px}
-.m-img{max-width:100%;max-height:280px;border-radius:10px;margin-top:6px;border:1px solid #2f3241;cursor:pointer}
+.m-img{max-width:100%;max-height:270px;border-radius:10px;margin-top:6px;border:1px solid #2f3241;cursor:pointer}
+.acts{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.act-b{background:#282a36;border:1px solid #343746;color:#ccc;border-radius:12px;padding:2px 8px;font-size:11px;cursor:pointer}
+#rep-bar{display:none;background:#16171d;padding:6px 16px;font-size:12px;color:#a29bfe;justify-content:space-between;align-items:center;border-top:1px solid #2a2c37}
 #emo-bar{display:none;padding:8px 14px;background:#16171d;border-top:1px solid #2a2c37;gap:8px;flex-wrap:wrap}
 .emo{font-size:20px;background:0 0;border:none;cursor:pointer;padding:4px}
-footer{padding:12px 16px;flex-shrink:0}
+footer{padding:10px 16px;flex-shrink:0}
 .in-box{background:#282a36;border-radius:12px;padding:6px 10px;display:flex;align-items:center;gap:8px;border:1px solid #343746}
 .in-box input{flex:1;background:0 0;border:none;color:#fff;font-size:15px;outline:none;padding:6px}
 .t-btn{background:0 0;border:none;color:#a0a4b8;font-size:19px;cursor:pointer;padding:6px 8px}
 .s-btn{background:#6c5ce7;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer}
-@media(max-width:680px){#side{position:fixed;inset:0 auto 0 0;z-index:40;transform:translateX(-100%)}#side.open{transform:translateX(0)}#menu-btn{display:inline-block}}
+#members{width:200px;background:#16171d;border-left:1px solid #2a2c37;padding:12px;overflow-y:auto;flex-shrink:0}
+.mem-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;margin-bottom:4px}
+.mem-item:hover{background:#232530}
+@media(max-width:820px){#members{display:none}#members.open{display:block;position:fixed;inset:0 0 0 auto;z-index:45}}
+@media(max-width:640px){#side{position:fixed;inset:0 auto 0 0;z-index:45;transform:translateX(-100%)}#side.open{transform:translateX(0)}#menu-btn{display:inline-block}}
 </style>
 </head>
 <body>
-<div id="login"><div class="card"><h2 style="margin:0 0 6px">Student Study Portal</h2><p style="font-size:13px;color:#555;margin:0 0 10px">Sign in to access shared Algebra II study groups.</p><input id="uname" placeholder="Your Nickname" maxlength="20"/><select id="ucol"><option value="#7c5dfa">Color: Midnight Purple</option><option value="#00b894">Color: Mint Green</option><option value="#0984e3">Color: Ocean Blue</option><option value="#fd79a8">Color: Sakura Pink</option><option value="#fdcb6e">Color: Starlight Gold</option><option value="#e17055">Color: Sunset Coral</option></select><input id="rpass" type="password" placeholder="Group Access Code"/><button id="jbtn" type="button">Open Notes</button><p id="stat" style="color:#d93025;font-size:13px;margin:8px 0 0"></p></div></div>
-<div id="panic"><h1>Unit 4: Quadratic Functions & Graphing</h1><p><strong>Standard Form:</strong> f(x) = ax² + bx + c, where a ≠ 0.</p><p><strong>Vertex Form:</strong> f(x) = a(x - h)² + k, where (h, k) is the vertex of the parabola.</p><p><strong>Axis of Symmetry:</strong> x = -b / 2a</p><p style="color:#666;font-size:13px;margin-top:30px">Press ESC or tap anywhere to return.</p></div>
-<aside id="side"><div class="srv"><span class="badge">🌙</span><span>Moon Studios</span></div><div class="lbl">Text Channels</div><button class="ch on" data-c="general"># general</button><button class="ch" data-c="memes"># memes-media</button><button class="ch" data-c="art"># art-projects</button><button class="ch" data-c="random"># random-vent</button><div class="me-bar"><div id="mav" class="av" style="width:30px;height:30px;font-size:13px;background:#7c5dfa">M</div><div><div id="mlbl" style="font-weight:600;color:#fff">Guest</div><div style="font-size:11px;color:#00b894">● Online</div></div></div></aside>
-<main id="main"><header><div style="display:flex;align-items:center;gap:10px"><button id="menu-btn" type="button">☰</button><strong id="hch"># general</strong></div><button id="pbtn" type="button" class="p-btn">Hide (ESC)</button></header><div id="msgs"></div><div id="emo-bar"><button class="emo" type="button">😂</button><button class="emo" type="button">😭</button><button class="emo" type="button">💀</button><button class="emo" type="button">🔥</button><button class="emo" type="button">💜</button><button class="emo" type="button">🌙</button><button class="emo" type="button">✨</button><button class="emo" type="button">👀</button><button class="emo" type="button">👍</button><button class="emo" type="button">🎉</button></div><footer><div class="in-box"><input type="file" id="img-in" accept="image/*" hidden/><button id="cbtn" type="button" class="t-btn">📷</button><button id="ebtn" type="button" class="t-btn">😀</button><input id="min" placeholder="Message #general..."/><button id="sbtn" type="button" class="s-btn">Send</button></div></footer></main>
+<div id="login"><div class="card"><h2 style="margin:0 0 6px">Student Study Portal</h2><p style="font-size:13px;color:#555;margin:0 0 10px">Sign in to access shared Algebra II study groups.</p><input id="uname" placeholder="Your Nickname" maxlength="20"/><select id="ucol"><option value="#7c5dfa">Color: Midnight Purple</option><option value="#00b894">Color: Mint Green</option><option value="#0984e3">Color: Ocean Blue</option><option value="#fd79a8">Color: Sakura Pink</option><option value="#fdcb6e">Color: Starlight Gold</option><option value="#e17055">Color: Sunset Coral</option></select><input id="rpass" type="password" placeholder="Group Access Code"/><button id="jbtn" class="btn-p" type="button">Open Notes</button><p id="stat" style="color:#d93025;font-size:13px;margin:8px 0 0"></p></div></div>
+<div id="panic"><h1>Unit 4: Quadratic Functions & Graphing</h1><p><strong>Standard Form:</strong> f(x) = ax² + bx + c, where a ≠ 0.</p><p><strong>Vertex Form:</strong> f(x) = a(x - h)² + k, where (h, k) is the vertex.</p><p><strong>Axis of Symmetry:</strong> x = -b / 2a</p><p style="color:#666;font-size:13px;margin-top:30px">Press ESC or tap anywhere to return.</p></div>
+<div id="modal"><div class="card dark-card"><h3 style="margin:0 0 10px">Edit Your Profile</h3><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><div id="pav" class="av" style="width:52px;height:52px;font-size:20px;background:#7c5dfa">M</div><div><input type="file" id="pfp-in" accept="image/*" hidden/><button type="button" class="h-btn" onclick="document.getElementById('pfp-in').click()">Upload PFP</button><div style="font-size:11px;color:#8b8fa3;margin-top:4px">Pick any image from gallery</div></div></div><input id="edit-name" placeholder="Nickname" maxlength="20"/><input id="edit-stat" placeholder="Custom Status (e.g. Vibing)" maxlength="30"/><select id="edit-col"><option value="#7c5dfa">Midnight Purple</option><option value="#00b894">Mint Green</option><option value="#0984e3">Ocean Blue</option><option value="#fd79a8">Sakura Pink</option><option value="#fdcb6e">Starlight Gold</option><option value="#e17055">Sunset Coral</option></select><button id="save-prof" class="btn-p" type="button">Save Changes</button><button id="logout-btn" class="btn-d" type="button">Log Out</button><button type="button" class="h-btn" style="width:100%;margin-top:8px" onclick="document.getElementById('modal').style.display='none'">Close</button></div></div>
+<aside id="side"><div class="srv"><span class="badge">🌙</span><span>Moon Studios</span></div><div class="ch-list"><div class="lbl"><span>Text Channels</span><button id="new-ch" class="add-ch">+</button></div><div id="ch-box"></div><div class="lbl" style="margin-top:10px"><span>Direct Messages</span></div><div style="font-size:12px;color:#666;padding:4px 14px">Tap a member on the right to DM</div></div><div class="me-bar" id="open-prof"><div id="mav" class="av" style="width:34px;height:34px;font-size:14px;background:#7c5dfa">M</div><div style="min-width:0;flex:1"><div id="mlbl" style="font-weight:600;color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Guest</div><div id="mstat" style="font-size:11px;color:#00b894;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">● Online</div></div><span style="color:#8b8fa3;font-size:14px">⚙️</span></div></aside>
+<main id="main"><header><div style="display:flex;align-items:center;gap:8px"><button id="menu-btn" class="h-btn" type="button">☰</button><strong id="hch"># general</strong></div><div class="h-btns"><button id="mem-btn" class="h-btn" type="button">👥 Members</button><button id="pbtn" class="h-btn p-btn" type="button">Hide (ESC)</button></div></header><div id="msgs"></div><div id="rep-bar"><span id="rep-txt"></span><button type="button" style="background:0 0;border:none;color:#fff;cursor:pointer" onclick="clearRep()">✕</button></div><div id="emo-bar"><button class="emo" type="button">😂</button><button class="emo" type="button">😭</button><button class="emo" type="button">💀</button><button class="emo" type="button">🔥</button><button class="emo" type="button">💜</button><button class="emo" type="button">🌙</button><button class="emo" type="button">✨</button><button class="emo" type="button">👀</button><button class="emo" type="button">👍</button><button class="emo" type="button">🎉</button></div><footer><div class="in-box"><input type="file" id="img-in" accept="image/*" hidden/><button id="cbtn" type="button" class="t-btn">📷</button><button id="ebtn" type="button" class="t-btn">😀</button><input id="min" placeholder="Message #general..."/><button id="sbtn" type="button" class="s-btn">Send</button></div></footer></main>
+<aside id="members"><div class="lbl" style="padding:4px 4px 10px">Online Friends</div><div id="mem-list"></div></aside>
 <script>
 const DB="notes-doc-default-rtdb"+".firebaseio.com",PASS="moon123";
-let me="",col="#7c5dfa",ch="general",rp="",seen=new Set();
-const url=()=>"https://"+DB+"/rooms/"+encodeURIComponent(rp)+"/"+ch+".json";
-document.getElementById("jbtn").onclick=async()=>{
-const n=document.getElementById("uname").value.trim(),p=document.getElementById("rpass").value.trim(),s=document.getElementById("stat");
-if(!n){s.textContent="Type a nickname first.";return}
-if(p!==PASS){s.textContent="Wrong password! Use moon123";return}
-s.textContent="Connecting...";me=n;col=document.getElementById("ucol").value;rp=p;
-try{const r=await fetch(url());if(!r.ok){s.textContent="Error "+r.status;return}
-document.getElementById("login").style.display="none";document.getElementById("mlbl").textContent=me;
-const av=document.getElementById("mav");av.textContent=me[0];av.style.background=col;
-render(await r.json());setInterval(poll,1500)}catch(e){s.textContent="Error: "+e.message}};
-document.querySelectorAll(".ch").forEach(b=>b.onclick=()=>{
-document.querySelectorAll(".ch").forEach(x=>x.classList.remove("on"));b.classList.add("on");
-ch=b.dataset.c;document.getElementById("hch").textContent="# "+ch;document.getElementById("min").placeholder="Message #"+ch+"...";
-document.getElementById("side").classList.remove("open");document.getElementById("msgs").innerHTML="";seen.clear();poll()});
-document.getElementById("menu-btn").onclick=()=>document.getElementById("side").classList.toggle("open");
-async function poll(){if(!rp)return;try{const r=await fetch(url());if(r.ok)render(await r.json())}catch(e){}}
-function render(d){if(!d)return;const box=document.getElementById("msgs");let add=false;
-Object.keys(d).forEach(k=>{if(seen.has(k))return;seen.add(k);add=true;const m=d[k],row=document.createElement("div");row.className="row";
-row.innerHTML='<div class="av" style="background:'+(m.c||"#6c5ce7")+'">'+(m.u||"?")[0]+'</div><div style="flex:1;min-width:0"><div><span class="m-user" style="color:'+(m.c||"#a29bfe")+'"></span><span class="m-time">'+(m.t||"")+'</span></div><div class="m-txt"></div></div>';
-row.querySelector(".m-user").textContent=m.u||"Anon";if(m.x)row.querySelector(".m-txt").textContent=m.x;
-if(m.i){const im=document.createElement("img");im.className="m-img";im.src=m.i;im.onclick=()=>window.open(m.i,"_blank");row.children[1].appendChild(im)}
-box.appendChild(row)});if(add)box.scrollTop=box.scrollHeight}
-async function push(p){if(!rp)return;await fetch(url(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});poll()}
-function send(){const i=document.getElementById("min"),x=i.value.trim();if(!x||!rp)return;i.value="";push({u:me,c:col,x,t:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})})}
+let me=localStorage.getItem("ms_name")||"",col=localStorage.getItem("ms_col")||"#7c5dfa",pfp=localStorage.getItem("ms_pfp")||"",ust=localStorage.getItem("ms_st")||"Online";
+let rp=localStorage.getItem("ms_pass")||"",ch="general",repTo=null,seen={},tempPfp=pfp;
+const base=()=>"https://"+DB+"/rooms/"+encodeURIComponent(rp);
+const mUrl=()=>base()+"/msgs/"+ch+".json";
+function setAv(el,name,color,pic){el.style.background=color||"#7c5dfa";el.innerHTML=pic?'<img src="'+pic+'"/>':(name||"?").charAt(0)}
+function syncMeUI(){document.getElementById("mlbl").textContent=me;document.getElementById("mstat").textContent="● "+ust;setAv(document.getElementById("mav"),me,col,pfp);setAv(document.getElementById("pav"),me,col,tempPfp)}
+async function startApp(){document.getElementById("login").style.display="none";syncMeUI();heartbeat();setInterval(heartbeat,15000);loadChannels();poll();setInterval(poll,1500);setInterval(loadMembers,5000);loadMembers()}
+if(me&&rp===PASS)startApp();
+document.getElementById("jbtn").onclick=async()=>{const n=document.getElementById("uname").value.trim(),p=document.getElementById("rpass").value.trim(),s=document.getElementById("stat");if(!n){s.textContent="Type a nickname first.";return}if(p!==PASS){s.textContent="Wrong password! Use moon123";return}s.textContent="Connecting...";me=n;col=document.getElementById("ucol").value;rp=p;try{const r=await fetch(base()+"/channels.json");if(!r.ok){s.textContent="Error "+r.status;return}localStorage.setItem("ms_name",me);localStorage.setItem("ms_col",col);localStorage.setItem("ms_pass",rp);startApp()}catch(e){s.textContent="Error: "+e.message}};
+async function heartbeat(){if(!rp||!me)return;const id=me.replace(/[.#$\[\]]/g,"_");await fetch(base()+"/users/"+id+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:me,col,pfp,st:ust,last:Date.now()})})}
+async function loadMembers(){if(!rp)return;try{const r=await fetch(base()+"/users.json"),d=await r.json();if(!d)return;const box=document.getElementById("mem-list");box.innerHTML="";Object.values(d).forEach(u=>{if(Date.now()-(u.last||0)>120000)return;const row=document.createElement("div");row.className="mem-item";const av=document.createElement("div");av.className="av";av.style.width="32px";av.style.height="32px";av.style.fontSize="13px";setAv(av,u.name,u.col,u.pfp);const info=document.createElement("div");info.style.minWidth="0";info.innerHTML='<div style="font-weight:600;font-size:13px;color:'+(u.col||"#fff")+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div><div style="font-size:11px;color:#8b8fa3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>';info.children[0].textContent=u.name;info.children[1].textContent=u.st||"Online";row.appendChild(av);row.appendChild(info);if(u.name!==me)row.onclick=()=>{const pair=[me,u.name].sort().join("_dm_").replace(/[.#$\[\]]/g,"_");switchCh("dm_"+pair,"@ "+u.name)};box.appendChild(row)})}catch(e){}}
+async function loadChannels(){const def=["general","memes-media","art-projects","random-vent"];try{const r=await fetch(base()+"/channels.json"),d=await r.json();const list=d?Object.values(d):def;const box=document.getElementById("ch-box");box.innerHTML="";list.forEach(c=>{const b=document.createElement("button");b.className="ch"+(ch===c?" on":"");b.textContent="# "+c;b.onclick=()=>switchCh(c,"# "+c);box.appendChild(b)})}catch(e){}}
+document.getElementById("new-ch").onclick=async()=>{const name=prompt("New channel name:");if(!name)return;const clean=name.toLowerCase().replace(/[^a-z0-9-]/g,"-").slice(0,20);if(!clean)return;await fetch(base()+"/channels/"+clean+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(clean)});loadChannels();switchCh(clean,"# "+clean)};
+function switchCh(id,label){ch=id;document.getElementById("hch").textContent=label;document.getElementById("min").placeholder="Message "+label+"...";document.getElementById("side").classList.remove("open");document.getElementById("members").classList.remove("open");document.getElementById("msgs").innerHTML="";seen={};clearRep();loadChannels();poll()}
+async function poll(){if(!rp)return;try{const r=await fetch(mUrl());if(r.ok)render(await r.json())}catch(e){}}
+function render(d){const box=document.getElementById("msgs");if(!d){box.innerHTML="";return}let add=false;Object.keys(d).forEach(k=>{const m=d[k];if(!m)return;const sig=JSON.stringify(m.rx||{});if(seen[k]===sig)return;seen[k]=sig;let row=document.getElementById("m_"+k);if(!row){row=document.createElement("div");row.id="m_"+k;row.className="row";box.appendChild(row);add=true}row.innerHTML="";const av=document.createElement("div");av.className="av";setAv(av,m.u,m.c,m.p);const body=document.createElement("div");body.style.cssText="flex:1;min-width:0";const hdr=document.createElement("div");hdr.innerHTML='<span class="m-user" style="color:'+(m.c||"#a29bfe")+'"></span><span class="m-time">'+(m.t||"")+'</span>';hdr.querySelector(".m-user").textContent=m.u||"Anon";body.appendChild(hdr);if(m.rep){const rpDiv=document.createElement("div");rpDiv.className="m-rep";rpDiv.textContent="↳ "+m.rep;body.appendChild(rpDiv)}if(m.x){const tx=document.createElement("div");tx.className="m-txt";tx.textContent=m.x;body.appendChild(tx)}if(m.i){const im=document.createElement("img");im.className="m-img";im.src=m.i;im.onclick=()=>window.open(m.i,"_blank");body.appendChild(im)}const acts=document.createElement("div");acts.className="acts";["❤️","😂","🔥"].forEach(em=>{const cnt=(m.rx&&m.rx[em])||0;const b=document.createElement("button");b.className="act-b";b.textContent=em+(cnt?" "+cnt:"");b.onclick=()=>fetch(base()+"/msgs/"+ch+"/"+k+"/rx/"+encodeURIComponent(em)+".json",{method:"PUT",body:JSON.stringify(cnt+1)}).then(poll);acts.appendChild(b)});const rb=document.createElement("button");rb.className="act-b";rb.textContent="↩ Reply";rb.onclick=()=>{repTo=(m.u||"Anon")+": "+(m.x||"").slice(0,40);document.getElementById("rep-txt").textContent="Replying to "+repTo;document.getElementById("rep-bar").style.display="flex";document.getElementById("min").focus()};acts.appendChild(rb);if(m.u===me){const db=document.createElement("button");db.className="act-b";db.textContent="🗑";db.onclick=()=>fetch(base()+"/msgs/"+ch+"/"+k+".json",{method:"DELETE"}).then(()=>{row.remove()});acts.appendChild(db)}body.appendChild(acts);row.appendChild(av);row.appendChild(body)});if(add)box.scrollTop=box.scrollHeight}
+function clearRep(){repTo=null;document.getElementById("rep-bar").style.display="none"}
+async function push(p){if(!rp)return;p.u=me;p.c=col;p.p=pfp;p.t=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});if(repTo){p.rep=repTo;clearRep()}await fetch(mUrl(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});poll()}
+function send(){const i=document.getElementById("min"),x=i.value.trim();if(!x||!rp)return;i.value="";push({x})}
 document.getElementById("sbtn").onclick=send;document.getElementById("min").onkeydown=e=>{if(e.key==="Enter")send()};
+document.getElementById("open-prof").onclick=()=>{tempPfp=pfp;document.getElementById("edit-name").value=me;document.getElementById("edit-stat").value=ust;document.getElementById("edit-col").value=col;syncMeUI();document.getElementById("modal").style.display="flex"};
+document.getElementById("pfp-in").onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=96;c.height=96;c.getContext("2d").drawImage(im,0,0,96,96);tempPfp=c.toDataURL("image/jpeg",.8);syncMeUI()};im.src=ev.target.result};r.readAsDataURL(f)};
+document.getElementById("save-prof").onclick=()=>{const nn=document.getElementById("edit-name").value.trim();if(nn)me=nn;ust=document.getElementById("edit-stat").value.trim()||"Online";col=document.getElementById("edit-col").value;pfp=tempPfp;localStorage.setItem("ms_name",me);localStorage.setItem("ms_col",col);localStorage.setItem("ms_pfp",pfp);localStorage.setItem("ms_st",ust);syncMeUI();heartbeat();document.getElementById("modal").style.display="none"};
+document.getElementById("logout-btn").onclick=()=>{localStorage.clear();location.reload()};
 document.getElementById("ebtn").onclick=()=>{const b=document.getElementById("emo-bar");b.style.display=b.style.display==="flex"?"none":"flex"};
 document.querySelectorAll(".emo").forEach(b=>b.onclick=()=>{const i=document.getElementById("min");i.value+=b.textContent;i.focus()});
-function sendImg(f){if(!f||!rp)return;const r=new FileReader();r.onload=e=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),s=Math.min(1,750/im.width);c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);push({u:me,c:col,i:c.toDataURL("image/jpeg",.75),t:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})})};im.src=e.target.result};r.readAsDataURL(f)}
+function sendImg(f){if(!f||!rp)return;const r=new FileReader();r.onload=e=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),s=Math.min(1,750/im.width);c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);push({i:c.toDataURL("image/jpeg",.75)})};im.src=e.target.result};r.readAsDataURL(f)}
 document.getElementById("cbtn").onclick=()=>document.getElementById("img-in").click();
 document.getElementById("img-in").onchange=e=>{if(e.target.files&&e.target.files[0])sendImg(e.target.files[0]);e.target.value=""};
 window.onpaste=e=>{const it=e.clipboardData&&e.clipboardData.items;if(!it)return;for(let i=0;i<it.length;i++)if(it[i].type.indexOf("image")!==-1)sendImg(it[i].getAsFile())};
+document.getElementById("menu-btn").onclick=()=>document.getElementById("side").classList.toggle("open");
+document.getElementById("mem-btn").onclick=()=>document.getElementById("members").classList.toggle("open");
 const tp=()=>{const p=document.getElementById("panic");p.style.display=p.style.display==="flex"?"none":"flex"};
 document.getElementById("pbtn").onclick=tp;document.getElementById("panic").onclick=tp;window.onkeydown=e=>{if(e.key==="Escape")tp()};
 </script>
 </body>
 </html>
-
-  
