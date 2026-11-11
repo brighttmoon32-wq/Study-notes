@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algebra II - Study Notes</title>
+  <link rel="icon" href="https://gstatic.com" />
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #18191c; color: #f2f3f5; display: flex; flex-direction: column; height: 100dvh; }
+    #login-screen, #panic-screen { position: fixed; inset: 0; background: #ffffff; color: #222; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    #panic-screen { display: none; justify-content: flex-start; align-items: flex-start; overflow-y: auto; }
+    .card { max-width: 360px; width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    input, button { width: 100%; padding: 10px 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 15px; }
+    button { background: #5865f2; color: white; border: none; font-weight: 600; cursor: pointer; }
+    header { background: #202225; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2f3136; }
+    #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .msg { background: #2f3136; padding: 10px 14px; border-radius: 10px; max-width: 82%; word-wrap: break-word; }
+    .msg.me { background: #4752c4; align-self: flex-end; }
+    .meta { font-size: 12px; opacity: 0.75; margin-bottom: 4px; }
+    .msg img { max-width: 100%; max-height: 260px; border-radius: 8px; margin-top: 6px; display: block; }
+    footer { background: #202225; padding: 10px; display: flex; gap: 8px; align-items: center; }
+    footer input[type="text"] { margin: 0; background: #2f3136; color: white; border: none; flex: 1; }
+    .icon-btn { width: auto; margin: 0; padding: 10px 14px; background: #2f3136; }
+  </style>
+</head>
+<body>
+
+  <!-- Disguised Login Screen -->
+  <div id="login-screen">
+    <div class="card">
+      <h2 style="margin-top:0;">Student Study Portal</h2>
+      <p style="font-size:14px;color:#555;">Enter your display name and class access code to view shared notes.</p>
+      <input id="username" type="text" placeholder="Your Nickname" />
+      <input id="room-pass" type="password" placeholder="Secret Group Password" />
+      <button onclick="enterChat()">Open Notes</button>
+    </div>
+  </div>
+
+  <!-- Panic Screen (Press ESC or click Hide) -->
+  <div id="panic-screen">
+    <h1>Unit 4: Quadratic Functions & Graphing</h1>
+    <p><strong>Standard Form:</strong> f(x) = ax² + bx + c, where a ≠ 0.</p>
+    <p><strong>Vertex Form:</strong> f(x) = a(x - h)² + k, where (h, k) is the vertex of the parabola.</p>
+    <p><strong>Axis of Symmetry:</strong> x = -b / 2a</p>
+    <p style="color:#666;font-size:13px;margin-top:30px;">Press ESC again to return to your session.</p>
+  </div>
+
+  <!-- Main Chat App -->
+  <header>
+    <strong># study-group</strong>
+    <button class="icon-btn" onclick="togglePanic()" style="font-size:13px;">Hide (ESC)</button>
+  </header>
+
+  <div id="messages"></div>
+
+  <footer>
+    <input type="file" id="img-input" accept="image/*" hidden onchange="handleImage(event)" />
+    <button class="icon-btn" onclick="document.getElementById('img-input').click()">📷</button>
+    <input id="msg-input" type="text" placeholder="Type a message or paste image..." onkeydown="if(event.key==='Enter') sendText()" />
+    <button class="icon-btn" style="background:#5865f2;" onclick="sendText()">Send</button>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://gstatic.com";
+    import { getDatabase, ref, push, onChildAdded } from "https://gstatic.com";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyANgc9HSvWQMuh8n1l-R3Uk95Ha20g7Dzg",
+      authDomain: "://firebaseapp.com",
+      databaseURL: "https://firebaseio.com",
+      projectId: "notes-doc",
+      storageBucket: "notes-doc.firebasestorage.app",
+      messagingSenderId: "1062143640148",
+      appId: "1:1062143640148:web:fc290bd30c24f234d7a3c1",
+      measurementId: "G-LQ4DENFFPZ"
+    };
+
+    // YOUR SECRET GROUP PASSWORD (Change "moon123" if you want a different password):
+    const SECRET_PASSWORD = "moon123";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let myName = "";
+    let roomRef = null;
+
+    window.enterChat = () => {
+      const name = document.getElementById("username").value.trim();
+      const pass = document.getElementById("room-pass").value.trim();
+      if (!name || pass !== SECRET_PASSWORD) {
+        alert("Incorrect access code or missing name.");
+        return;
+      }
+      myName = name;
+      document.getElementById("login-screen").style.display = "none";
+      roomRef = ref(db, "rooms/" + pass);
+      onChildAdded(roomRef, (snap) => renderMessage(snap.val()));
+    };
+
+    function renderMessage(data) {
+      const box = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = "msg" + (data.user === myName ? " me" : "");
+      div.innerHTML = `<div class="meta">${data.user} • ${data.time}</div>`;
+      if (data.text) {
+        const p = document.createElement("div");
+        p.textContent = data.text;
+        div.appendChild(p);
+      }
+      if (data.img) {
+        const img = document.createElement("img");
+        img.src = data.img;
+        div.appendChild(img);
+      }
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    window.sendText = () => {
+      const input = document.getElementById("msg-input");
+      const text = input.value.trim();
+      if (!text || !roomRef) return;
+      push(roomRef, { user: myName, text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+      input.value = "";
+    };
+
+    function compressAndSend(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxW = 700;
+          const scale = Math.min(1, maxW / img.width);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+          const compressed = canvas.toDataURL("image/jpeg", 0.72);
+          push(roomRef, { user: myName, img: compressed, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.handleImage = (e) => {
+      if (e.target.files) compressAndSend(e.target.files);
+      e.target.value = "";
+    };
+
+    window.addEventListener("paste", (e) => {
+      const item = [...e.clipboardData.items].find(i => i.type.startsWith("image/"));
+      if (item && roomRef) compressAndSend(item.getAsFile());
+    });
+
+    window.togglePanic = () => {
+      const p = document.getElementById("panic-screen");
+      p.style.display = p.style.display === "flex" ? "none" : "flex";
+    };
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") togglePanic(); });
+  </script>
+</body>
+</html>
